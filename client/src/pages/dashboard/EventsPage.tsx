@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '../../services/api';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
-import { ErrorMessage } from '../../components/ui/ErrorMessage';
 import { useToast } from '../../contexts/ToastContext';
 import { useBadgeNotifications } from '../../hooks/useBadgeNotifications';
 import { useAIFeedbackNotifications } from '../../hooks/useAIFeedbackNotifications';

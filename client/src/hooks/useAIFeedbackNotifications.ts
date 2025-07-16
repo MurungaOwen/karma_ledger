@@ -1,12 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { apiClient } from '../services/api';
 import { useToast } from '../contexts/ToastContext';
-import type { KarmaEvent } from '../types';
 
 export const useAIFeedbackNotifications = () => {
   const { showToast } = useToast();
   const processingEventsRef = useRef<Set<string>>(new Set());
-  const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const checkIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const addProcessingEvent = (eventId: string) => {
     processingEventsRef.current.add(eventId);

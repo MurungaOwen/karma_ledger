@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../../services/api';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { ErrorMessage } from '../../components/ui/ErrorMessage';
-import type { KarmaEvent, UserBadge } from '../../types';
+import type { KarmaEvent } from '../../types';
 
 export const DashboardOverview = () => {
   const navigate = useNavigate();
