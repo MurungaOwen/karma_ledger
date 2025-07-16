@@ -38,14 +38,14 @@ export const BadgesPage = () => {
     return earnedBadges.some(earned => earned.badge_id === badgeId);
   };
 
-  const getBadgeEarnedDate = (badgeId: string) => {
-    const earned = earnedBadges.find(earned => earned.badge_id === badgeId);
-    return earned ? new Date(earned.awarded_at) : null;
-  };
+  // const getBadgeEarnedDate = (badgeId: string) => {
+  //   const earned = earnedBadges.find(earned => earned.badge_id === badgeId);
+  //   return earned ? new Date(earned.awarded_at) : null;
+  // };
 
-  const getEarnedBadgeDetails = (badgeId: string) => {
-    return earnedBadges.find(earned => earned.badge_id === badgeId);
-  };
+  // const getEarnedBadgeDetails = (badgeId: string) => {
+  //   return earnedBadges.find(earned => earned.badge_id === badgeId);
+  // };
 
   const getBadgeIcon = (icon: string) => {
     const iconMap: { [key: string]: string } = {
