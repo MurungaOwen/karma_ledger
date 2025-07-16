@@ -11,6 +11,7 @@ import { Logger } from '@nestjs/common';
 import { handleError } from 'src/util/error';
 import { BadgeEvents } from 'src/config/events';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { getCurrentCalendarWeek } from 'src/util/date.util';
 
 @Processor(QueueNames.KARMA_SUGGESTION)
 export class SuggestionsProcessor extends WorkerHost {
@@ -40,47 +41,64 @@ export class SuggestionsProcessor extends WorkerHost {
       const user = await this.userRepo.findByPk(userId);
       if (!user) throw new Error(`User ${userId} not found.`);
 
-      // Calculate user's week range from signup date
-      const { start, end } = this.getWeekFromJoinDate(user.createdAt, week);
+      // Use calendar week approach for consistency with leaderboard
+      const { start: currentWeekStart, end: currentWeekEnd } = getCurrentCalendarWeek();
 
-      const events = await this.karmaEventRepo.findAll({
+      // Get events from current calendar week
+      const currentWeekEvents = await this.karmaEventRepo.findAll({
         where: {
           user_id: userId,
           occurred_at: {
-            [Op.between]: [start, end],
+            [Op.between]: [currentWeekStart, currentWeekEnd],
           },
         },
         order: [['occurred_at', 'DESC']],
       });
+
+      // If no events in current week, get recent events from last 3 weeks
+      let events = currentWeekEvents;
+      if (currentWeekEvents.length === 0) {
+        const threeWeeksAgo = new Date(Date.now() - 21 * 24 * 60 * 60 * 1000);
+        events = await this.karmaEventRepo.findAll({
+          where: {
+            user_id: userId,
+            occurred_at: {
+              [Op.gte]: threeWeeksAgo,
+            },
+          },
+          order: [['occurred_at', 'DESC']],
+          limit: 20, // Reasonable limit for AI analysis
+        });
+      }
 
       const suggestions = await this.aiService.generateWeeklySuggestions(
         userId,
         events,
       );
 
-      this.logger.warn(
-        `Cleared old suggestions for user ${userId} week ${week}`,
+      this.logger.log(
+        `Generating fresh suggestions for user ${userId} based on ${events.length} recent karma events`,
       );
 
       const existingCount = await this.suggestionRepo.count({
         where: { user_id: userId },
       });
 
-      // delete prev suggestions for the same week- (duplicate)
+      // Delete ALL previous suggestions for the user to ensure fresh content
       await this.suggestionRepo.destroy({
         where: {
           user_id: userId,
-          week,
         },
       });
 
+      const now = new Date();
       const created = await this.suggestionRepo.bulkCreate(
         suggestions.map((text) => ({
           user_id: userId,
           suggestion_text: text,
           week,
           used: false,
-          created_at: new Date(),
+          created_at: now,
         })),
       );
       if (existingCount === 0 && created.length > 0) {
@@ -95,6 +113,7 @@ export class SuggestionsProcessor extends WorkerHost {
     }
   }
 
+
   /**
    * Given a user's signup date and current app week number,
    * returns the real date range (start and end) for that user's personal week.
@@ -105,7 +124,7 @@ export class SuggestionsProcessor extends WorkerHost {
   ): { start: Date; end: Date } {
     const joined = new Date(joinedAt);
     const start = new Date(joined.getTime() + (weekOffset - 1) * 7 * 86400000);
-    const end = new Date(start.getTime() + 6 * 86400000);
+    const end = new Date(start.getTime() + 7 * 86400000); // Fixed: use 7 days, not 6
     return { start, end };
   }
 }
