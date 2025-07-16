@@ -22,9 +22,10 @@ export class AuthController {
   async createUser(@Body() userData: CreateUserDto) {
     try {
       const user = await this.usersService.createUser(userData);
+      const loginResponse = await this.authService.login(user);
       return {
         message: 'User created successfully',
-        access_token: await this.authService.login(user),
+        access_token: loginResponse.access_token,
         data: user.toJSON(),
       };
     } catch (error) {

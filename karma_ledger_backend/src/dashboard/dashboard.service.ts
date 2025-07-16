@@ -12,6 +12,7 @@ import { QueueNames } from 'src/config/queues';
 import { BadgeEvents } from 'src/config/events';
 import { Badge } from './models/badge.model';
 import { UserBadge } from 'src/users/models/user_badges.model';
+import { getCurrentCalendarWeek } from 'src/util/date.util';
 
 @Injectable()
 export class DashboardService {
@@ -41,6 +42,19 @@ export class DashboardService {
       where: { user_id: userId },
       order: [['created_at', 'DESC']],
     });
+  }
+
+  async markSuggestionAsUsed(suggestionId: string, userId: string): Promise<Suggestion> {
+    const suggestion = await this.suggestionRepo.findOne({
+      where: { id: suggestionId, user_id: userId },
+    });
+
+    if (!suggestion) {
+      throw new Error('Suggestion not found');
+    }
+
+    await suggestion.update({ used: true });
+    return suggestion;
   }
 
   /** Manually create a suggestion for a user */
@@ -74,6 +88,7 @@ export class DashboardService {
     );
     return Math.max(1, Math.ceil(diffDays / 7));
   }
+
 
   /** Get weekly karma scores since user joined, normalized to 0–100 */
   // async getWeeklyKarmaScores(userId: string) {
@@ -150,18 +165,20 @@ export class DashboardService {
     return weeklyScores;
   }
 
-  /** Returns top 10 users by average karma score for their current week */
+  /** Returns top 10 users by average karma score for the current calendar week */
   /**
-   * [PRODUCTION-READY] Returns the top 10 users by average karma score for their current week.
-   * This implementation is database-agnostic and avoids the N+1 query problem, making it
-   * suitable for production environments like PostgreSQL.
+   * [PRODUCTION-READY] Returns the top 10 users by average karma score for the current calendar week.
+   * This implementation uses calendar weeks (Monday-Sunday) for fair comparison across all users.
    */
   async getWeeklyLeaderboard(): Promise<
     { userId: string; username: string; score: number }[]
   > {
-    // 1. Fetch all users with only the necessary fields. This is a simple, portable query.
+    // Get the current calendar week boundaries (Monday to Sunday)
+    const { start: weekStart, end: weekEnd } = getCurrentCalendarWeek();
+
+    // Get all users
     const users = await this.userRepo.findAll({
-      attributes: ['user_id', 'username', 'createdAt'],
+      attributes: ['user_id', 'username'],
       raw: true,
     });
 
@@ -169,52 +186,29 @@ export class DashboardService {
       return [];
     }
 
-    // 2. In Node.js (universally), calculate the current week's date range for each user.
-    const userWeekRanges = users.map((user) => {
-      const joinDate = new Date(user.createdAt);
-      const currentWeekNumber = this.getWeekSinceJoin(joinDate);
-      const start = new Date(
-        joinDate.getTime() + (currentWeekNumber - 1) * 7 * 86400000,
-      );
-      const end = new Date(start.getTime() + 7 * 86400000);
-      return {
-        userId: user.user_id,
-        username: user.username,
-        start,
-        end,
-      };
-    });
-
-    // 3. Build a single, powerful aggregation query using Sequelize's portable operators.
-    // Sequelize will translate this into the correct SQL for PostgreSQL, SQLite, etc.
+    // Get karma events for ALL users in the current calendar week
     const userScores = (await this.karmaEventRepo.findAll({
       attributes: [
         'user_id',
-        // fn('AVG', ...) is translated to AVG(...) in SQL by Sequelize.
         [fn('AVG', col('intensity')), 'avg_intensity'],
+        [fn('COUNT', col('event_id')), 'event_count'],
       ],
       raw: true,
       where: {
-        // [Op.or] creates a chain of conditions, which is standard SQL.
-        [Op.or]: userWeekRanges.map((range) => ({
-          user_id: range.userId,
-          // [Op.between] is translated to `... BETWEEN ... AND ...`, which is standard SQL.
-          occurred_at: {
-            [Op.between]: [range.start, range.end],
-          },
-        })),
+        occurred_at: {
+          [Op.between]: [weekStart, weekEnd],
+        },
       },
-      group: ['user_id'], // GROUP BY is standard SQL.
-    })) as unknown as { user_id: string; avg_intensity: number | null }[]; // avg can be null if no events found
+      group: ['user_id'],
+    })) as unknown as { user_id: string; avg_intensity: number | null; event_count: number }[];
 
-    // 4. Map the aggregated scores back to usernames and normalize the score.
+    // Map the aggregated scores back to usernames and normalize the score
     const leaderboard = userScores.map((score) => {
       const user = users.find((u) => u.user_id === score.user_id);
-      // Handle the case where a user has no events, resulting in a null average.
-      const avg =
-        score.avg_intensity === null ? 0 : Number(score.avg_intensity);
+      // Handle the case where a user has no events, resulting in a null average
+      const avg = score.avg_intensity === null ? 0 : Number(score.avg_intensity);
 
-      // The normalization logic is standard math, independent of the database.
+      // Normalize the score to 0-100 range
       const normalizedScore = Math.round(((avg - -1) / 11) * 100);
 
       return {

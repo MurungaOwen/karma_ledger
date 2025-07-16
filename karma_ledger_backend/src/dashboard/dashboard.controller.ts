@@ -1,4 +1,4 @@
-import { Controller, Get, Request } from '@nestjs/common';
+import { Controller, Get, Request, Patch, Param } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
@@ -23,6 +23,21 @@ export class DashboardController {
   @Get('/suggestions')
   async getSuggestions(@Request() req: AuthenticatedRequest) {
     return this.DashboardService.getSuggestions(req.user?.user_id ?? '');
+  }
+
+  @Patch('/suggestions/:id/mark-used')
+  async markSuggestionAsUsed(
+    @Param('id') suggestionId: string,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    try {
+      return this.DashboardService.markSuggestionAsUsed(
+        suggestionId,
+        req.user?.user_id ?? '',
+      );
+    } catch (error) {
+      throw new HttpException(handleError(error), HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Get('/karma-scores')
