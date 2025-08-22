@@ -193,22 +193,22 @@ export const EventsPage = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <h2 className="text-2xl font-bold text-gray-900">
           Karma Events
         </h2>
-        <div className="flex space-x-3">
+        <div className="flex gap-2">
           <button
             onClick={() => fetchEvents(true)}
             disabled={refreshLoading}
-            className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2"
+            className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2"
           >
             {refreshLoading && <LoadingSpinner size="sm" />}
             <span>{refreshLoading ? 'Refreshing...' : 'Refresh'}</span>
           </button>
           <button
             onClick={() => setShowCreateForm(!showCreateForm)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-colors"
           >
             {showCreateForm ? 'Cancel' : 'Add Event'}
           </button>
@@ -255,21 +255,21 @@ export const EventsPage = () => {
                 id="occurred_at"
                 value={formData.occurred_at}
                 onChange={(e) => setFormData({ ...formData, occurred_at: e.target.value })}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            <div className="flex justify-end space-x-3">
+            <div className="flex flex-col sm:flex-row sm:justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setShowCreateForm(false)}
-                className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+                className="w-full sm:w-auto px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={createLoading || !formData.action.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors flex items-center space-x-2"
+                className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition-colors flex items-center justify-center space-x-2"
               >
                 {createLoading && <LoadingSpinner size="sm" />}
                 <span>{createLoading ? 'Creating...' : 'Create Event'}</span>
@@ -396,7 +396,7 @@ export const EventsPage = () => {
       </div>
 
       {/* Results Summary */}
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-2 mb-4">
         <div className="text-sm text-gray-600">
           Showing {paginatedEvents.length} of {filteredEvents.length} events
           {hasActiveFilters && ` (${events.length} total)`}
@@ -440,7 +440,7 @@ export const EventsPage = () => {
           <div className="divide-y divide-gray-200">
             {paginatedEvents.map((event) => (
               <div key={event.event_id} className="p-6">
-                <div className="flex justify-between items-start mb-3">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3">
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">
                       {event.action}
@@ -455,7 +455,7 @@ export const EventsPage = () => {
                     </p>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getIntensityColor(event.intensity)}`}>
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${getIntensityColor(event.intensity)}`}>
                       {getIntensityLabel(event.intensity)} ({event.intensity}/10)
                     </span>
                   </div>
@@ -512,12 +512,12 @@ export const EventsPage = () => {
           <button
             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400"
+            className="px-3 sm:px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400"
           >
             Previous
           </button>
           
-          <div className="flex space-x-2">
+          <div className="hidden sm:flex space-x-2">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
               <button
                 key={page}
@@ -533,10 +533,14 @@ export const EventsPage = () => {
             ))}
           </div>
           
+          <div className="sm:hidden text-sm text-gray-600">
+            {currentPage} / {totalPages}
+          </div>
+          
           <button
             onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
             disabled={currentPage === totalPages}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400"
+            className="px-3 sm:px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400"
           >
             Next
           </button>

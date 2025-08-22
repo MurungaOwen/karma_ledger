@@ -147,7 +147,7 @@ export const LeaderboardPage = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
             Weekly Leaderboard
@@ -159,7 +159,7 @@ export const LeaderboardPage = () => {
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2"
+          className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center space-x-2"
         >
           {refreshing ? <LoadingSpinner size="sm" /> : (
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,13 +241,13 @@ export const LeaderboardPage = () => {
       {leaderboard.length >= 3 && (
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-6 text-center">🏆 Top 3 Champions 🏆</h3>
-          <div className="flex justify-center items-end space-x-4">
+          <div className="flex justify-center items-end space-x-2 sm:space-x-4">
             {/* 2nd Place */}
             <div className="text-center">
               <div className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center mb-2">
                 <span className="text-2xl">🥈</span>
               </div>
-              <div className="bg-gray-100 rounded-lg p-4 w-32">
+              <div className="bg-gray-100 rounded-lg p-2 sm:p-4 w-24 sm:w-32">
                 <p className="font-semibold text-gray-900 truncate">{leaderboard[1].username}</p>
                 <p className="text-sm text-gray-600">{leaderboard[1].score}%</p>
                 <p className="text-xs text-gray-500">#2</p>
@@ -259,7 +259,7 @@ export const LeaderboardPage = () => {
               <div className="w-24 h-24 bg-yellow-300 rounded-full flex items-center justify-center mb-2 border-4 border-yellow-500">
                 <span className="text-3xl">🥇</span>
               </div>
-              <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4 w-36">
+              <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-2 sm:p-4 w-28 sm:w-36">
                 <p className="font-bold text-yellow-900 truncate">{leaderboard[0].username}</p>
                 <p className="text-sm text-yellow-700">{leaderboard[0].score}%</p>
                 <p className="text-xs text-yellow-600">👑 CHAMPION</p>
@@ -271,7 +271,7 @@ export const LeaderboardPage = () => {
               <div className="w-20 h-20 bg-amber-300 rounded-full flex items-center justify-center mb-2">
                 <span className="text-2xl">🥉</span>
               </div>
-              <div className="bg-amber-50 rounded-lg p-4 w-32">
+              <div className="bg-amber-50 rounded-lg p-2 sm:p-4 w-24 sm:w-32">
                 <p className="font-semibold text-amber-900 truncate">{leaderboard[2].username}</p>
                 <p className="text-sm text-amber-700">{leaderboard[2].score}%</p>
                 <p className="text-xs text-amber-600">#3</p>
@@ -315,14 +315,14 @@ export const LeaderboardPage = () => {
                     isCurrentUser ? 'bg-blue-50 border-l-4 border-blue-500' : 'hover:bg-gray-50'
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex items-center space-x-3">
                       <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-100">
                         <span className="text-2xl">{getRankIcon(rank)}</span>
                       </div>
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <h3 className={`text-lg font-semibold ${
+                      <div className="flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className={`text-base sm:text-lg font-semibold ${
                             isCurrentUser ? 'text-blue-900' : 'text-gray-900'
                           }`}>
                             {entry.username}
@@ -333,28 +333,28 @@ export const LeaderboardPage = () => {
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center space-x-2 mt-1">
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${rankBadge.color}`}>
                             {rankBadge.text}
                           </span>
-                          <span className="text-sm text-gray-500">
+                          <span className="text-xs sm:text-sm text-gray-500">
                             {getPerformanceText(entry.score)}
                           </span>
                         </div>
                       </div>
                     </div>
                     
-                    <div className="flex items-center space-x-6">
+                    <div className="flex items-center sm:block">
                       <div className="text-right">
                         <div className="flex items-center space-x-2">
-                          <span className={`text-2xl font-bold ${getScoreColor(entry.score)}`}>
+                          <span className={`text-xl sm:text-2xl font-bold ${getScoreColor(entry.score)}`}>
                             {entry.score}%
                           </span>
-                          <span className={`text-lg font-bold ${getScoreColor(entry.score)}`}>
+                          <span className={`text-base sm:text-lg font-bold ${getScoreColor(entry.score)}`}>
                             ({getScoreGrade(entry.score)})
                           </span>
                         </div>
-                        <div className="w-24 bg-gray-200 rounded-full h-2 mt-1">
+                        <div className="w-20 sm:w-24 bg-gray-200 rounded-full h-2 mt-1">
                           <div
                             className={`h-2 rounded-full transition-all duration-500 ${getScoreBarColor(entry.score)}`}
                             style={{ width: `${entry.score}%` }}
@@ -390,42 +390,42 @@ export const LeaderboardPage = () => {
                   
                   return (
                     <div className="p-6 bg-blue-50 border-l-4 border-blue-500">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div className="flex items-center space-x-3">
                           <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100">
                             <span className="text-2xl">{getRankIcon(userRank)}</span>
                           </div>
-                          <div>
-                            <div className="flex items-center space-x-2">
-                              <h3 className="text-lg font-semibold text-blue-900">
+                          <div className="flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h3 className="text-base sm:text-lg font-semibold text-blue-900">
                                 {currentUserEntry.username}
                               </h3>
                               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                 You
                               </span>
                             </div>
-                            <div className="flex items-center space-x-2 mt-1">
+                            <div className="flex flex-wrap items-center gap-2 mt-1">
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${rankBadge.color}`}>
                                 {rankBadge.text}
                               </span>
-                              <span className="text-sm text-gray-500">
+                              <span className="text-xs sm:text-sm text-gray-500">
                                 {getPerformanceText(currentUserEntry.score)}
                               </span>
                             </div>
                           </div>
                         </div>
                         
-                        <div className="flex items-center space-x-6">
+                        <div className="flex items-center sm:block">
                           <div className="text-right">
                             <div className="flex items-center space-x-2">
-                              <span className={`text-2xl font-bold ${getScoreColor(currentUserEntry.score)}`}>
+                              <span className={`text-xl sm:text-2xl font-bold ${getScoreColor(currentUserEntry.score)}`}>
                                 {currentUserEntry.score}%
                               </span>
-                              <span className={`text-lg font-bold ${getScoreColor(currentUserEntry.score)}`}>
+                              <span className={`text-base sm:text-lg font-bold ${getScoreColor(currentUserEntry.score)}`}>
                                 ({getScoreGrade(currentUserEntry.score)})
                               </span>
                             </div>
-                            <div className="w-24 bg-gray-200 rounded-full h-2 mt-1">
+                            <div className="w-20 sm:w-24 bg-gray-200 rounded-full h-2 mt-1">
                               <div
                                 className={`h-2 rounded-full transition-all duration-500 ${getScoreBarColor(currentUserEntry.score)}`}
                                 style={{ width: `${currentUserEntry.score}%` }}
@@ -456,7 +456,7 @@ export const LeaderboardPage = () => {
                 <div key={index} className={`flex items-center justify-between py-3 px-4 rounded-lg ${
                   isLatest ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'
                 }`}>
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center gap-2">
                     <span className={`text-sm font-medium ${isLatest ? 'text-blue-900' : 'text-gray-600'}`}>
                       Week {weekScore.week}
                     </span>
@@ -466,14 +466,14 @@ export const LeaderboardPage = () => {
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="w-32 bg-gray-200 rounded-full h-3">
+                  <div className="flex items-center gap-2 sm:gap-4">
+                    <div className="w-20 sm:w-32 bg-gray-200 rounded-full h-3">
                       <div
                         className={`h-3 rounded-full transition-all duration-500 ${getScoreBarColor(score)}`}
                         style={{ width: `${score}%` }}
                       ></div>
                     </div>
-                    <div className="flex items-center space-x-2 min-w-0">
+                    <div className="flex items-center gap-1 sm:gap-2 min-w-0">
                       <span className={`text-sm font-bold ${getScoreColor(score)}`}>
                         {score}%
                       </span>
